@@ -260,6 +260,6 @@ rag_accounting_project/
   - 최신 Gemini Flash 및 FastAPI `/api/v1/chat` 엔드포인트 구현 완료
 - [x] **Step 4: 대화형 웹 챗봇(Streamlit) 완성 & MCP 도구화 (챗봇의 얼굴 완성)**
   - 실제 대화하며 출처(아코디언)를 확인할 수 있는 웹 챗봇(`app.py`) 완성
-  - Claude/Cursor에서 연말정산 전문 지식 도구로 불러다 쓸 수 있는 FastMCP(`server.py`) 연동 완료
+  - Codex/Claude/Cursor에서 연말정산 전문 지식 도구로 불러다 쓸 수 있는 FastMCP(`server.py`) 연동 완료
 - [x] **Step 5: 정량 평가 및 포트폴리오 문서화**
   - OpenAPI 3.1 표준 문서화 및 포트폴리오 기술 회고 정리 완료
