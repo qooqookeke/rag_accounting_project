@@ -9,6 +9,8 @@
 [![Streamlit](https://img.shields.io/badge/Frontend-Streamlit%20Chatbot-FF4B4B.svg)](https://streamlit.io/)
 [![MCP](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol-purple.svg)](https://modelcontextprotocol.io/)
 
+🌐 **Language**: [English (README_EN.md)](README_EN.md) | [한국어 (Korean)](README.md)
+
 ---
 
 ## 🚀 1. 설치 및 연동 가이드 (Quick Start & Integration)

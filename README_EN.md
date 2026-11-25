@@ -9,7 +9,7 @@
 [![Streamlit](https://img.shields.io/badge/Frontend-Streamlit%20Chatbot-FF4B4B.svg)](https://streamlit.io/)
 [![MCP](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol-purple.svg)](https://modelcontextprotocol.io/)
 
-[한국어 README (Korean)](README.md)
+🌐 **Language**: [English (README_EN.md)](README_EN.md) | [한국어 (Korean)](README.md)
 
 ---
 
