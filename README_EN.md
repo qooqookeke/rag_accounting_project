@@ -8,8 +8,11 @@
 [![ChromaDB](https://img.shields.io/badge/VectorDB-ChromaDB-orange.svg)](https://www.trychroma.com/)
 [![Streamlit](https://img.shields.io/badge/Frontend-Streamlit%20Chatbot-FF4B4B.svg)](https://streamlit.io/)
 [![MCP](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol-purple.svg)](https://modelcontextprotocol.io/)
+[![Built with Antigravity](https://img.shields.io/badge/Built%20with-Google%20Antigravity-4285F4.svg)](https://antigravity.google/)
+[![Tech Blog](https://img.shields.io/badge/Tech%20Blog-Tistory-orange.svg)](https://homouniversalis.tistory.com/376)
 
-🌐 **Language**: [English (README_EN.md)](README_EN.md) | [한국어 (Korean)](README.md)
+🌐 **Language**: [English (README_EN.md)](README_EN.md) | [한국어 (Korean)](README.md)  
+📝 **Behind the Scenes (Tech Blog)**: [https://homouniversalis.tistory.com/376](https://homouniversalis.tistory.com/376)
 
 ---
 
@@ -146,10 +149,10 @@ Embed a floating chatbot button in the bottom-right corner of your personal blog
 > Focusing 100% on **earned income year-end tax settlement**—which impacts over 20 million workers annually—allows us to eliminate hallucination around statutory exceptions and build a production-grade, zero-defect RAG pipeline.
 
 ### Target Datasets
-1. **National Law Information Center Open API (Ministry of Government Legislation)**:
-   - Key articles from the `Income Tax Act` (Articles 50, 51, 52, 59-4, etc.)
+1. **National Law Information Center Official Statutory Datasets**:
+   - Official full-text articles of the `Income Tax Act` and `Restriction of Special Taxation Act` (Articles 50, 51, 52, 59-4, and Article 95-2 for rent credit)
 2. **National Tax Service Official Publications**:
-   - `2024 Year-End Tax Settlement Comprehensive Guide` PDF (Rent, Medical, Education, and Credit Card deductions)
+   - `2024 Year-End Tax Settlement Comprehensive Guide` (Rent, Medical, Education, and Credit Card deductions)
 3. **National Tax Service Advance Rulings & FAQs**:
    - High-frequency real-world Q&A (e.g., dual-income couple dependent deductions, job transfers)
 
@@ -160,8 +163,8 @@ Embed a floating chatbot button in the bottom-right corner of your personal blog
 ```mermaid
 flowchart TD
     subgraph DataPipeline["1. Data Ingestion & Chunking"]
-        LawAPI["National Law Open API\n(Income Tax Act Articles)"] --> LawSplitter["Article Splitter\n(Articles 50, 59-4, etc.)"]
-        PDF["NTS Comprehensive Guide\n(Categorized PDF Manual)"] --> PDFParser["Structural PDF Parser\n(Rent, Medical, Personal, etc.)"]
+        LawData["National Law Information Center\nOfficial Statutory Text"] --> LawSplitter["Article Splitter\n(Articles 50, 59-4, 95-2, etc.)"]
+        PDF["NTS Comprehensive Guide\n(Categorized Manual)"] --> PDFParser["Structural PDF Parser\n(Rent, Medical, Personal, etc.)"]
         FAQ["NTS Q&A Dataset\n(Consultation Cases)"] --> FAQParser["Q&A Pair Structuring"]
         
         LawSplitter --> SemanticChunker["Tax-Specialized Semantic Chunker\n(Preserves Provisos & Exception Clauses)"]
@@ -263,3 +266,18 @@ rag_accounting_project/
   - Implemented standard MCP tool server for Codex / Cursor / Claude Desktop (`server.py`)
 - [x] **Step 5: Documentation & Production Readiness**
   - Completed OpenAPI specs, bilingual READMEs, and technical interview walkthroughs
+
+---
+
+## 🚀 7. Future Roadmap
+
+- [ ] **Real-time National Law Open API Integration**: Synchronize with `open.law.go.kr` API to build an automated pipeline for updating amended tax articles (`src/core/collector.py`)
+- [ ] **Tax Category Expansion**: Add VAT (General/Simplified) and Comprehensive Income Tax reporting guides
+- [ ] **Production Cloud Deployment**: Permanent hosting on Streamlit Community Cloud and Cloud Run
+
+---
+
+## 🤝 Acknowledgements & Blog
+
+* **AI Pair Programming**: This project was developed in close collaboration with **Google DeepMind's AI agent 'Antigravity'**.
+* **Development Story (Korean Blog)**: [https://homouniversalis.tistory.com/376](https://homouniversalis.tistory.com/376)

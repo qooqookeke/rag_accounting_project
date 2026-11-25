@@ -8,8 +8,11 @@
 [![ChromaDB](https://img.shields.io/badge/VectorDB-ChromaDB-orange.svg)](https://www.trychroma.com/)
 [![Streamlit](https://img.shields.io/badge/Frontend-Streamlit%20Chatbot-FF4B4B.svg)](https://streamlit.io/)
 [![MCP](https://img.shields.io/badge/Protocol-Model%20Context%20Protocol-purple.svg)](https://modelcontextprotocol.io/)
+[![Built with Antigravity](https://img.shields.io/badge/Built%20with-Google%20Antigravity-4285F4.svg)](https://antigravity.google/)
+[![Tech Blog](https://img.shields.io/badge/Tech%20Blog-Tistory-orange.svg)](https://homouniversalis.tistory.com/376)
 
-🌐 **Language**: [English (README_EN.md)](README_EN.md) | [한국어 (Korean)](README.md)
+🌐 **Language**: [English (README_EN.md)](README_EN.md) | [한국어 (Korean)](README.md)  
+📝 **개발 비하인드 스토리 (블로그)**: [https://homouniversalis.tistory.com/376](https://homouniversalis.tistory.com/376)
 
 ---
 
@@ -146,10 +149,10 @@ Codex, Claude Desktop이나 Cursor AI에게 "연말정산 전문 검색 도구"�
 > 2,000만 근로자가 매년 겪고 가장 질문이 많은 **'근로소득 연말정산' 단 하나의 도메인에 100% 집중**하여, 단서 조항 누락 없는 무결점 챗봇 파이프라인을 완성합니다.
 
 ### 1차 타깃 데이터셋
-1. **국가법령정보 Open API (법제처)**:
-   - `소득세법` 중 연말정산 핵심 조문 (제50조 기본공제, 제51조 추가공제, 제52조 특별소득공제, 제59조의4 특별세액공제 등 약 15개 핵심 조문)
+1. **국가법령정보센터 공식 조문 데이터**:
+   - `소득세법` 및 `조세특례제한법` 중 연말정산 핵심 조문 원문 (제50조 기본공제, 제51조 추가공제, 제52조 특별소득공제, 제59조의4 특별세액공제, 조특법 제95조의2 월세액 공제 등)
 2. **국세청 공식 발간물**:
-   - `2024년 귀속 연말정산 종합안내` 해설서 PDF (월세액, 의료비, 교육비, 신용카드 공제 요건 및 한도)
+   - `2024년 귀속 연말정산 종합안내` 해설서 (월세액, 의료비, 교육비, 신용카드 공제 요건 및 한도)
 3. **국세청 연말정산 사전답변 / 질의응답 (Q&A)**:
    - 맞벌이 부부 부양가족 중복 공제, 중도 입·퇴사자 정산 등 실제 빈출 상담 데이터
 
@@ -160,8 +163,8 @@ Codex, Claude Desktop이나 Cursor AI에게 "연말정산 전문 검색 도구"�
 ```mermaid
 flowchart TD
     subgraph DataPipeline["1. 데이터 수집 및 청킹 (Data Ingestion)"]
-        LawAPI["국가법령정보 Open API\n(소득세법 연말정산 조문)"] --> LawSplitter["조문 단위 분할\n(제50조, 제59조의4 등)"]
-        PDF["국세청 연말정산 종합안내\n(항목별 해설서 PDF)"] --> PDFParser["항목별 구조 파서\n(월세, 의료비, 인적공제 등)"]
+        LawData["국가법령정보센터 공식 조문 원문\n(소득세법, 조특법 연말정산 조문)"] --> LawSplitter["조문 단위 분할\n(제50조, 제59조의4, 제95조의2 등)"]
+        PDF["국세청 연말정산 종합안내\n(항목별 해설서)"] --> PDFParser["항목별 구조 파서\n(월세, 의료비, 인적공제 등)"]
         FAQ["국세청 연말정산 Q&A\n(빈출 상담 사례)"] --> FAQParser["질의-답변 페어링"]
         
         LawSplitter --> SemanticChunker["연말정산 특화 의미론적 청커\n(공제조건/단서조항 온전 보존)"]
@@ -263,3 +266,18 @@ rag_accounting_project/
   - Codex/Claude/Cursor에서 연말정산 전문 지식 도구로 불러다 쓸 수 있는 FastMCP(`server.py`) 연동 완료
 - [x] **Step 5: 정량 평가 및 포트폴리오 문서화**
   - OpenAPI 3.1 표준 문서화 및 포트폴리오 기술 회고 정리 완료
+
+---
+
+## 🚀 7. 향후 고도화 로드맵 (Future Roadmap)
+
+- [ ] **법제처 국가법령정보 Open API 실시간 연동**: `open.law.go.kr` API와 동기화하여 매년 개정되는 세법 조문 자동 갱신 파이프라인 구축 (`src/core/collector.py`)
+- [ ] **세목 다변화 확장**: 2차 부가가치세(일반/간이과세자), 3차 5월 종합소득세 신고 해설서 데이터셋 추가
+- [ ] **상용 클라우드 배포**: Streamlit Community Cloud 및 Cloud Run 기반 상시 운영 서비스 배포
+
+---
+
+## 🤝 Acknowledgements & Blog
+
+* **AI Pair Programming**: 본 프로젝트는 **Google DeepMind의 AI 에이전트 'Antigravity'와의 협업**을 통해 개발되었습니다.
+* **상세 개발기 포스팅**: [https://homouniversalis.tistory.com/376](https://homouniversalis.tistory.com/376)
