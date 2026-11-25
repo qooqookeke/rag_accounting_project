@@ -13,12 +13,12 @@
 
 ## 🚀 1. 설치 및 연동 가이드 (Quick Start & Integration)
 
-본 프로젝트는 **(1) 웹 챗봇**, **(2) REST API 백엔드**, **(3) Claude Desktop / Cursor MCP 플러그인**, **(4) 기존 웹사이트 임베디드 위젯**의 4가지 방식으로 바로 연결하여 사용할 수 있습니다.
+본 프로젝트는 **(1) 웹 챗봇**, **(2) REST API 백엔드**, **(3) Codex / Claude Desktop / Cursor MCP 플러그인**, **(4) 기존 웹사이트 임베디드 위젯**의 4가지 방식으로 바로 연결하여 사용할 수 있습니다.
 
 ### [기본 환경 준비]
 ```bash
 # 1. 저장소 클론 및 이동
-git clone https://github.com/<your-username>/rag_accounting_project.git
+git clone https://github.com/qooqookeke/rag_accounting_project.git
 cd rag_accounting_project
 
 # 2. 가상환경 생성 및 활성화
@@ -98,10 +98,10 @@ FastAPI와 Pydantic Type Hint를 기반으로 **OpenAPI 3.1 표준 문서가 자
 
 ---
 
-#### 방법 C. Claude Desktop / Cursor에 MCP 플러그인으로 연결
-`korean-law-mcp`처럼, Claude Desktop이나 Cursor AI에게 **"연말정산 전문 검색 도구"**를 쥐어줍니다.
+#### 방법 C. Codex / Claude Desktop / Cursor에 MCP 플러그인으로 연결
+Codex, Claude Desktop이나 Cursor AI에게 **"연말정산 전문 검색 도구"**를 쥐어줍니다.
 
-* **Claude Desktop 설정** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+* **Codex / Claude Desktop 설정** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
@@ -112,7 +112,14 @@ FastAPI와 Pydantic Type Hint를 기반으로 **OpenAPI 3.1 표준 문서가 자
   }
 }
 ```
-👉 이제 Claude에게 *"월세 세액공제 한도 얼마야?"*라고 물어보면, Claude가 이 도구(`search_yeta_deduction`)를 직접 호출하여 정확한 조문과 함께 답변합니다.
+👉 이제 사용중인 LLM에서 "월세 세액공제 한도 얼마야?"라고 물어보면, Claude가 이 도구(`search_yeta_deduction`)를 직접 호출하여 정확한 조문과 함께 답변합니다.
+
+* **Cursor / VS Code 계열 (코덱스/AI 에디터)**
+  * Cursor: Settings → Features → MCP 메뉴에서 + Add New MCP Server 버튼 클릭
+    * Type: command
+    * Name: yeta-tax-rag
+    * Command: /절대경로/rag_accounting_project/venv/bin/python /절대경로/rag_accounting_project/src/mcp/server.py (또는 ~/.cursor/mcp.json 파일에 위 JSON을 그대로 붙여넣기)
+* VS Code (Roo Code / Continue 등): 각 확장 프로그램 설정의 mcp_config.json에 위 JSON을 그대로 붙여넣기
 
 ---
 
