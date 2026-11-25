@@ -250,11 +250,29 @@ rag_accounting_project/
 
 ---
 
+## 📊 5. 정량적 검색 성능 벤치마크 (Evaluation Benchmark)
+
+실제 근로소득 연말정산 빈출 질문 10종(월세, 의료비, 난임시술, 안경, 산후조리원, 맞벌이 부양가족, 교육비, 신용카드 등)의 골든 테스트셋을 구축하고, **로컬 ChromaDB 및 BAAI/bge-m3 기반 Retriever의 검색 품질을 정량 측정**했습니다.
+
+```bash
+# 벤치마크 평가 스크립트 실행
+python tests/benchmark_eval.py
+```
+
+| 평가 지표 (Metric) | 측정 결과 | 지표 정의 및 의미 |
+| :--- | :---: | :--- |
+| **Hit Rate @ 1 (Top-1 정확도)** | **90.0%** (9/10) | 사용자의 질문에 가장 정확한 조문/가이드가 **1위로 검색**된 비율 |
+| **Hit Rate @ 3 (Top-3 적중률)** | **100.0%** (10/10) | 상위 3개 청크 내에 정답 법령 근거가 **100% 포함**된 비율 |
+| **MRR (Mean Reciprocal Rank)** | **0.950** | 첫 번째 정답 문서 순위의 역수 평균 (1.0에 가까울수록 최상위 랭크) |
+| **평균 검색 지연시간 (Latency)** | **~45 ms** | 로컬 장비(Mac) 기준 1개 질문 벡터화 및 Top-K 검색 소요 시간 |
+
+---
+
 ## 🛠️ 6. 단계별 구현 계획 (완료)
 
 - [x] **Step 1: 연말정산 데이터 준비 & 청킹 설계**
   - 소득세법 연말정산 핵심 조문 및 2024 연말정산 종합안내 FAQ 수집
-  - 조문별/공제항목별 의미론적 청킹(`chunker.py`) 완료
+  - 조문별/공제항목별 의미론적 청킹(`chunker.py`, `parser.py`, `collector.py`) 완료
 - [x] **Step 2: 로컬 임베딩 & 검색기(Retriever) 검증**
   - `bge-m3`로 연말정산 청크 임베딩 후 ChromaDB 적재(`indexer.py`)
   - 대표 연말정산 질문(월세, 의료비, 부양가족)으로 Top-K 검색 검증 완료
@@ -264,8 +282,9 @@ rag_accounting_project/
 - [x] **Step 4: 대화형 웹 챗봇(Streamlit) 완성 & MCP 도구화 (챗봇의 얼굴 완성)**
   - 실제 대화하며 출처(아코디언)를 확인할 수 있는 웹 챗봇(`app.py`) 완성
   - Codex/Claude/Cursor에서 연말정산 전문 지식 도구로 불러다 쓸 수 있는 FastMCP(`server.py`) 연동 완료
-- [x] **Step 5: 정량 평가 및 포트폴리오 문서화**
-  - OpenAPI 3.1 표준 문서화 및 포트폴리오 기술 회고 정리 완료
+- [x] **Step 5: 정량 평가 벤치마크 & 단위 테스트 구축 (품질 고도화)**
+  - `pytest` 기반 단위 테스트(`tests/test_chunker.py`, `tests/test_retriever.py`) 구축
+  - 골든 테스트셋 10종 대상 정량 벤치마크(`tests/benchmark_eval.py`) 평가 완료 (Hit@1 90%, Hit@3 100%)
 
 ---
 

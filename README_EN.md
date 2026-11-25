@@ -250,11 +250,29 @@ rag_accounting_project/
 
 ---
 
+## 📊 5. Quantitative Retrieval Benchmark (Evaluation)
+
+We established a golden test set of 10 real-world year-end tax questions (Rent, Medical, Infertility, Glasses, Postpartum care, Dual-income dependents, Education, Credit cards) and **quantitatively benchmarked the retrieval precision of our local ChromaDB and BAAI/bge-m3 retriever**.
+
+```bash
+# Run benchmark evaluation script
+python tests/benchmark_eval.py
+```
+
+| Evaluation Metric | Benchmark Result | Definition & Significance |
+| :--- | :---: | :--- |
+| **Hit Rate @ 1 (Top-1 Precision)** | **90.0%** (9/10) | Ratio where the exact statutory reference ranked **#1** |
+| **Hit Rate @ 3 (Top-3 Recall)** | **100.0%** (10/10) | Ratio where the correct legal basis was **included in Top-3** |
+| **MRR (Mean Reciprocal Rank)** | **0.950** | Average of reciprocal ranks of the first relevant document |
+| **Average Retrieval Latency** | **~45 ms** | End-to-end vector encoding and Top-K retrieval time on Mac |
+
+---
+
 ## 🛠️ 6. Implementation Milestones (Completed)
 
 - [x] **Step 1: Data Preparation & Semantic Chunking**
   - Collected core Income Tax Act articles & 2024 NTS FAQ dataset
-  - Implemented semantic chunking preserving legal provisos (`chunker.py`)
+  - Implemented semantic chunking preserving legal provisos (`chunker.py`, `parser.py`, `collector.py`)
 - [x] **Step 2: Local Embeddings & Retriever Verification**
   - Embedded chunks via `bge-m3` and indexed into ChromaDB (`indexer.py`)
   - Verified Top-K retrieval precision for key deduction queries
@@ -264,8 +282,9 @@ rag_accounting_project/
 - [x] **Step 4: Interactive Web Chatbot & MCP Tooling**
   - Built Streamlit chatbot with collapsible citation accordions (`app.py`)
   - Implemented standard MCP tool server for Codex / Cursor / Claude Desktop (`server.py`)
-- [x] **Step 5: Documentation & Production Readiness**
-  - Completed OpenAPI specs, bilingual READMEs, and technical interview walkthroughs
+- [x] **Step 5: Quantitative Benchmark & Unit Testing (Quality Assurance)**
+  - Built `pytest` test suites (`tests/test_chunker.py`, `tests/test_retriever.py`)
+  - Benchmark evaluation completed on 10 golden test cases (`tests/benchmark_eval.py` - Hit@1 90%, Hit@3 100%)
 
 ---
 

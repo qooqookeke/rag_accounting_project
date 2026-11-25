@@ -23,7 +23,12 @@ class YetaEmbedder:
         if cls._instance is None:
             cls._instance = super(YetaEmbedder, cls).__new__(cls)
             print(f"🔄 임베딩 모델 로딩 중... ({settings.EMBEDDING_MODEL_NAME})")
-            cls._instance.model = SentenceTransformer(settings.EMBEDDING_MODEL_NAME)
+            try:
+                # 1. 이미 다운로드된 로컬 캐시에서 오프라인 초고속 로드 시도
+                cls._instance.model = SentenceTransformer(settings.EMBEDDING_MODEL_NAME, local_files_only=True)
+            except Exception:
+                # 2. 로컬 캐시가 없는 경우 허깅페이스 허브에서 다운로드
+                cls._instance.model = SentenceTransformer(settings.EMBEDDING_MODEL_NAME)
             print("✅ 임베딩 모델 로드 완료!")
         return cls._instance
 
