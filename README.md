@@ -1,7 +1,7 @@
 # 🏛️ Yeta-RAG: 근로소득 연말정산 특화 지식 엔진 & 챗봇 솔루션
 
 > **"연말정산의 모든 공제 요건을 법적 근거(조문/페이지)와 함께 안내하는 전문 RAG 시스템"**  
-> 고성능 백엔드 지식 엔진을 바탕으로, **실제 웹사이트에 바로 탑재 가능한 대화형 챗봇(웹 대시보드 및 임베디드 위젯)**과 Claude Desktop/Cursor용 표준 MCP 도구를 모두 제공합니다.
+> 고성능 백엔드 지식 엔진을 바탕으로, 실제 웹사이트에 바로 탑재 가능한 대화형 챗봇(웹 대시보드 및 임베디드 위젯)과 Claude Desktop/Cursor용 표준 MCP 도구를 모두 제공합니다.
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
@@ -99,7 +99,7 @@ FastAPI와 Pydantic Type Hint를 기반으로 **OpenAPI 3.1 표준 문서가 자
 ---
 
 #### 방법 C. Codex / Claude Desktop / Cursor에 MCP 플러그인으로 연결
-Codex, Claude Desktop이나 Cursor AI에게 **"연말정산 전문 검색 도구"**를 쥐어줍니다.
+Codex, Claude Desktop이나 Cursor AI에게 "연말정산 전문 검색 도구"를 쥐어줍니다.
 
 * **Codex / Claude Desktop 설정** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 ```json
