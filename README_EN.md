@@ -200,7 +200,28 @@ flowchart TD
 
 ---
 
-## 💡 4. Architectural Decisions & Trade-offs
+## 🛡️ 4. Multi-Layer Security Guardrails (Anti-Prompt Injection & Out-of-Scope Defense)
+
+To prevent **API token abuse** and **prompt injection exploits**, we implemented a **3-Layer Defense-in-Depth architecture**:
+
+```mermaid
+flowchart TD
+    UserQ["User Input"] --> L1{"Layer 1: Injection Pattern Check\n(Jailbreaks, System Prompt Extraction)"}
+    L1 -- "Malicious" --> Block1["🚨 Immediate Block (No LLM Call / Zero Cost)"]
+    L1 -- "Safe" --> Retriever["ChromaDB Vector Retrieval"]
+    Retriever --> L2{"Layer 2: Tax Relevance Threshold\n(Top-1 Score >= 0.45)"}
+    L2 -- "Out of Scope (Stocks/Coding/Chat)" --> Block2["🛑 Polite Rejection (No LLM Call / Zero Cost)"]
+    L2 -- "Tax Related" --> L3["Layer 3: Locked-Persona System Prompt\n(Gemini 3.8 Flash Inference)"]
+    L3 --> SafeAns["Safe Tax Response + Citations"]
+```
+
+1. **Layer 1 (Explicit Injection Block)**: Patterns like `ignore previous instructions`, `jailbreak`, or `reveal system prompt` are caught before calling the LLM.
+2. **Layer 2 (Out-of-Scope Threshold & Cost Defense)**: Irrelevant queries (stocks, coding, casual chat) fail the similarity threshold (`< 0.45`), **skipping Gemini API invocation entirely** to prevent token drain.
+3. **Layer 3 (Locked-Persona Prompt)**: Enforces role consistency and forbids instruction leaks at the model level.
+
+---
+
+## 💡 5. Architectural Decisions & Trade-offs
 
 | Domain | Chosen Approach | Alternatives Considered | Rationale & Trade-offs |
 | :--- | :--- | :--- | :--- |
