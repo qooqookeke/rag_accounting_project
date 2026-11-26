@@ -129,13 +129,20 @@ Codex, Claude Desktop이나 Cursor AI에게 "연말정산 전문 검색 도구"�
 ---
 
 #### 방법 D. 기존 웹사이트에 챗봇 위젯 임베드 (홈페이지/블로그 탑재)
-본인의 개인 블로그나 회사 홈페이지 우측 하단에 플로팅 챗봇 버튼을 달고 싶을 때 HTML 코드에 삽입합니다:
+본인의 개인 블로그나 회사 홈페이지에 미니 챗봇을 달고 싶을 때 백엔드 API(`/api/v1/chat`)를 연동합니다.  
+프로젝트 내 [src/ui/widget_demo.html](src/ui/widget_demo.html)를 브라우저로 열면 실제 동작하는 독립 위젯을 테스트해 볼 수 있습니다:
+
 ```html
-<!-- 웹사이트 HTML 하단에 삽입 -->
-<script src="https://cdn.jsdelivr.net/npm/@chatwoot/widget@latest"></script>
+<!-- 웹사이트 HTML에 삽입 가능한 위젯 연동 예시 -->
 <script>
-  // FastAPI 백엔드 엔드포인트(/api/v1/chat)와 연결
-  initTaxChatbot({ apiUrl: "https://your-api-domain.com/api/v1/chat" });
+  async function askTaxRag(query) {
+    const res = await fetch("http://localhost:8000/api/v1/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: query, top_k: 2 })
+    });
+    return await res.json();
+  }
 </script>
 ```
 
@@ -181,13 +188,13 @@ flowchart TD
         Retriever --> TopChunks["관련 법령 조문 & 국세청 해설 청크"]
         TopChunks --> PromptEngine["세무 특화 프롬프트\n(근거 조문/페이지 필수 인용 + 환각 차단)"]
         PromptEngine --> LLMProvider["LLM 인터페이스 (Gemini 2.0 Flash / 로컬 Ollama)"]
-        LLMProvider --> FastAPI["FastAPI REST 백엔드\n(/api/v1/chat, /api/v1/query)"]
+        LLMProvider --> FastAPI["FastAPI REST 백엔드\n(/api/v1/chat)"]
     end
 
     subgraph ServingLayer["3. 사용자 접점: 다중 챗봇 배포 계층 (챗봇의 '얼굴')"]
         FastAPI --> WebApp["① 독립형 웹 챗봇 사이트\n(Streamlit 웹앱)"]
-        FastAPI --> WebWidget["② 기존 웹사이트 탑재용 챗봇 위젯\n(블로그/회사 홈페이지 우측 하단)"]
-        FastAPI --> MCP["③ AI IDE / 데스크톱 도구\n(Claude Desktop / Cursor용 FastMCP)"]
+        FastAPI --> WebWidget["② 기존 웹사이트 탑재용 챗봇 위젯\n(src/ui/widget_demo.html)"]
+        FastAPI --> MCP["③ AI IDE / 데스크톱 도구\n(Codex / Claude Desktop / Cursor용 FastMCP)"]
     end
 ```
 
@@ -205,47 +212,52 @@ flowchart TD
 
 ---
 
-## 📂 5. 프로젝트 디렉토리 구조
+## 📂 5. 프로젝트 디렉토리 구조 (실제 파일 트리)
 
 ```text
 rag_accounting_project/
 ├── data/
-│   ├── raw/                  # 연말정산 원본 (소득세법 조문 JSON, 연말정산 종합안내 PDF)
-│   ├── processed/            # 청킹 완료된 연말정산 JSONL
-│   └── chroma_db/            # 연말정산 ChromaDB 인덱스
+│   ├── raw/                  # 연말정산 원본 (소득세법/조특법 조문 및 국세청 가이드)
+│   ├── processed/            # 청킹 중간 산출물
+│   └── chroma_db/            # 연말정산 ChromaDB 로컬 인덱스
 │
 ├── src/
 │   ├── __init__.py
-│   ├── config.py             # 설정 (모델명, 청크 크기, 임계치)
+│   ├── config.py             # 전역 환경설정 (경로, 모델명, 임계치)
 │   │
 │   ├── core/                 # [연말정산 RAG 코어 엔진]
-│   │   ├── collector.py      # 법제처 Open API 연말정산 조문 수집기
-│   │   ├── parser.py         # 연말정산 PDF 구조화 파서
+│   │   ├── collector.py      # 로컬 데이터 무결성 검증 및 법령 API 연동 인터페이스
+│   │   ├── parser.py         # 텍스트(.txt) 및 PDF(.pdf) 구조화 파서 (PyMuPDF)
 │   │   ├── chunker.py        # 조문/공제항목별 의미론적 청커
-│   │   ├── embedder.py       # 로컬 bge-m3 임베더
-│   │   ├── vector_store.py   # ChromaDB 연동 모듈
-│   │   └── retriever.py      # 연말정산 Top-K 검색기
+│   │   ├── embedder.py       # 로컬 bge-m3 임베더 (오프라인 캐시 우선 로드)
+│   │   ├── indexer.py        # ChromaDB 벡터 적재 및 인덱싱 모듈
+│   │   └── retriever.py      # 연말정산 Top-K 검색기 (필터 방어 로직)
 │   │
 │   ├── llm/                  # [Any-LLM 생성 모듈]
-│   │   ├── base.py           # LLMProvider 추상 클래스
-│   │   ├── gemini.py         # Gemini Flash 구현체
-│   │   ├── ollama.py         # 로컬 Ollama 구현체
+│   │   ├── chain.py          # RAG 파이프라인 체인 (검색 -> 프롬프트 -> LLM)
+│   │   ├── client.py         # Gemini 3.8 Flash 클라이언트 (Any-LLM 인터페이스)
 │   │   └── prompts.py        # 연말정산 전용 근거 인용(Citation) 프롬프트
 │   │
 │   ├── api/                  # [FastAPI 백엔드]
-│   │   ├── main.py           # REST API 진입점 (/api/v1/chat)
-│   │   └── schemas.py        # Pydantic Request/Response 모델
+│   │   ├── main.py           # REST API 서버 (/api/v1/chat, Swagger/ReDoc)
+│   │   └── schemas.py        # Pydantic Request/Response 모델 규격
 │   │
-│   ├── ui/                   # [대화형 웹 챗봇 프론트엔드]
-│   │   └── app.py            # Streamlit 대화형 챗봇 & 출처 아코디언 UI
+│   ├── ui/                   # [대화형 웹 챗봇 & 위젯]
+│   │   ├── app.py            # Streamlit 대화형 챗봇 & 출처 아코디언 UI
+│   │   └── widget_demo.html  # 웹사이트 임베디드 챗봇 위젯 실제 동작 데모
 │   │
 │   └── mcp/                  # [MCP 서버 플러그인]
-│       └── server.py         # Claude / Cursor용 세무 도구 (FastMCP)
+│       └── server.py         # Codex / Claude / Cursor 연동용 FastMCP 도구
 │
-├── tests/
-├── .env.example
-├── requirements.txt
-└── README.md
+├── tests/                    # [테스트 및 벤치마크]
+│   ├── test_chunker.py       # 청킹 무결성 단위 테스트 (pytest)
+│   ├── test_retriever.py     # ChromaDB 검색 단위 테스트 (pytest)
+│   └── benchmark_eval.py     # 10문항 골든셋 정량 평가 벤치마크 스크립트
+│
+├── .env.example              # 환경변수 템플릿
+├── requirements.txt          # 의존성 패키지 목록
+├── README.md                 # 한국어 기술 명세서
+└── README_EN.md              # 영문 기술 명세서
 ```
 
 ---
@@ -259,10 +271,10 @@ rag_accounting_project/
 python tests/benchmark_eval.py
 ```
 
-| 평가 지표 (Metric) | 측정 결과 | 지표 정의 및 의미 |
+| 평가 지표 (Metric) | 10문항 실측 결과 | 지표 정의 및 평가 기준 |
 | :--- | :---: | :--- |
-| **Hit Rate @ 1 (Top-1 정확도)** | **90.0%** (9/10) | 사용자의 질문에 가장 정확한 조문/가이드가 **1위로 검색**된 비율 |
-| **Hit Rate @ 3 (Top-3 적중률)** | **100.0%** (10/10) | 상위 3개 청크 내에 정답 법령 근거가 **100% 포함**된 비율 |
+| **Hit Rate @ 1 (10문항 검색 Hit@1 적중률)** | **90.0%** (9/10) | 10문항 중 가장 정확한 조문/가이드가 **1위로 검색**된 비율 |
+| **Hit Rate @ 3 (10문항 검색 Hit@3 적중률)** | **100.0%** (10/10) | 상위 3개 청크 내에 정답 법령 근거가 **100% 포함**된 비율 |
 | **MRR (Mean Reciprocal Rank)** | **0.950** | 첫 번째 정답 문서 순위의 역수 평균 (1.0에 가까울수록 최상위 랭크) |
 | **평균 검색 지연시간 (Latency)** | **~45 ms** | 로컬 장비(Mac) 기준 1개 질문 벡터화 및 Top-K 검색 소요 시간 |
 

@@ -51,6 +51,7 @@ def health_check():
         raise HTTPException(status_code=500, detail=f"Database connection error: {str(e)}")
 
 @app.post("/api/v1/chat", response_model=QueryResponse, summary="연말정산 세무 상담 및 근거 인용 답변")
+@app.post("/api/v1/query", response_model=QueryResponse, summary="연말정산 세무 상담 (하위 호환 alias)")
 def chat_with_tax_rag(request: QueryRequest):
     """
     사용자의 질문을 받아 관련 세법 조문/해설서를 검색한 뒤,

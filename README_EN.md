@@ -129,13 +129,20 @@ Empower Codex, Claude Desktop, or Cursor AI with a dedicated **Year-End Tax Sear
 ---
 
 #### Mode D. Embed Chatbot Widget into Existing Websites
-Embed a floating chatbot button in the bottom-right corner of your personal blog or company homepage:
+To embed a mini chatbot into your personal blog or company homepage, connect to the backend API (`/api/v1/chat`).  
+Open [src/ui/widget_demo.html](src/ui/widget_demo.html) directly in your browser to test a live working embedded widget:
+
 ```html
-<!-- Insert at the bottom of your website HTML -->
-<script src="https://cdn.jsdelivr.net/npm/@chatwoot/widget@latest"></script>
+<!-- Example of embedding a tax chatbot into your website HTML -->
 <script>
-  // Connect with FastAPI backend endpoint (/api/v1/chat)
-  initTaxChatbot({ apiUrl: "https://your-api-domain.com/api/v1/chat" });
+  async function askTaxRag(query) {
+    const res = await fetch("http://localhost:8000/api/v1/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: query, top_k: 2 })
+    });
+    return await res.json();
+  }
 </script>
 ```
 
@@ -181,13 +188,13 @@ flowchart TD
         Retriever --> TopChunks["Relevant Statutory & Guide Chunks"]
         TopChunks --> PromptEngine["Tax Prompt Engine\n(Strict Citations & Anti-Hallucination)"]
         PromptEngine --> LLMProvider["LLM Client (Gemini 3.8 Flash / Local Ollama)"]
-        LLMProvider --> FastAPI["FastAPI REST Backend\n(/api/v1/chat, /api/v1/query)"]
+        LLMProvider --> FastAPI["FastAPI REST Backend\n(/api/v1/chat)"]
     end
 
     subgraph ServingLayer["3. Multi-Channel Serving (The 'UI')"]
         FastAPI --> WebApp["① Standalone Web Chatbot\n(Streamlit Web App)"]
-        FastAPI --> WebWidget["② Embedded Chat Widget\n(Blog / Homepage Floating Widget)"]
-        FastAPI --> MCP["③ AI IDE / Desktop Tools\n(FastMCP for Claude Desktop / Cursor)"]
+        FastAPI --> WebWidget["② Embedded Chat Widget\n(src/ui/widget_demo.html)"]
+        FastAPI --> MCP["③ AI IDE / Desktop Tools\n(Codex / Claude Desktop / Cursor용 FastMCP)"]
     end
 ```
 
@@ -205,7 +212,7 @@ flowchart TD
 
 ---
 
-## 📂 5. Project Directory Structure
+## 📂 5. Project Directory Structure (Actual File Tree)
 
 ```text
 rag_accounting_project/
@@ -219,29 +226,34 @@ rag_accounting_project/
 │   ├── config.py             # Global configurations (paths, models, thresholds)
 │   │
 │   ├── core/                 # [Core RAG Engine]
-│   │   ├── collector.py      # Law Open API collector
-│   │   ├── parser.py         # Structural PDF parser
+│   │   ├── collector.py      # Dataset integrity validator & Law API scaffold
+│   │   ├── parser.py         # Text (.txt) & PDF (.pdf) structural parser (PyMuPDF)
 │   │   ├── chunker.py        # Semantic chunker by article/topic
-│   │   ├── embedder.py       # Local bge-m3 embedder
-│   │   ├── vector_store.py   # ChromaDB interface
-│   │   └── retriever.py      # Top-K dense retriever
+│   │   ├── embedder.py       # Local bge-m3 embedder (offline cache first)
+│   │   ├── indexer.py        # ChromaDB vector indexing module
+│   │   └── retriever.py      # Top-K dense retriever (filter fallback logic)
 │   │
 │   ├── llm/                  # [Any-LLM Module]
-│   │   ├── base.py           # LLMProvider abstract interface
-│   │   ├── client.py         # Gemini 3.8 Flash & Ollama client
+│   │   ├── chain.py          # RAG pipeline chain (Retrieval -> Prompt -> LLM)
+│   │   ├── client.py         # Gemini 3.8 Flash client (Any-LLM interface)
 │   │   └── prompts.py        # Strict citation system prompts
 │   │
 │   ├── api/                  # [FastAPI Backend]
-│   │   ├── main.py           # REST API entrypoint (/api/v1/chat)
+│   │   ├── main.py           # REST API entrypoint (/api/v1/chat, Swagger/ReDoc)
 │   │   └── schemas.py        # Pydantic Request/Response models
 │   │
-│   ├── ui/                   # [Streamlit Web UI]
-│   │   └── app.py            # Chatbot UI with citation accordions
+│   ├── ui/                   # [Streamlit Web UI & Widget]
+│   │   ├── app.py            # Chatbot UI with citation accordions
+│   │   └── widget_demo.html  # Live working embedded chatbot widget demo
 │   │
 │   └── mcp/                  # [MCP Plugin]
 │       └── server.py         # MCP tool server for Codex, Cursor, Claude
 │
-├── tests/
+├── tests/                    # [Testing & Benchmarking]
+│   ├── test_chunker.py       # Chunking integrity unit tests (pytest)
+│   ├── test_retriever.py     # ChromaDB retrieval unit tests (pytest)
+│   └── benchmark_eval.py     # 10-Question golden testset quantitative benchmark
+│
 ├── .env.example
 ├── requirements.txt
 ├── README.md                 # Korean documentation
@@ -259,10 +271,10 @@ We established a golden test set of 10 real-world year-end tax questions (Rent, 
 python tests/benchmark_eval.py
 ```
 
-| Evaluation Metric | Benchmark Result | Definition & Significance |
+| Evaluation Metric | 10-Question Result | Definition & Significance |
 | :--- | :---: | :--- |
-| **Hit Rate @ 1 (Top-1 Precision)** | **90.0%** (9/10) | Ratio where the exact statutory reference ranked **#1** |
-| **Hit Rate @ 3 (Top-3 Recall)** | **100.0%** (10/10) | Ratio where the correct legal basis was **included in Top-3** |
+| **Hit Rate @ 1 (10-Question Hit@1 Precision)** | **90.0%** (9/10) | Ratio where the exact statutory reference ranked **#1** |
+| **Hit Rate @ 3 (10-Question Hit@3 Recall)** | **100.0%** (10/10) | Ratio where the correct legal basis was **included in Top-3** |
 | **MRR (Mean Reciprocal Rank)** | **0.950** | Average of reciprocal ranks of the first relevant document |
 | **Average Retrieval Latency** | **~45 ms** | End-to-end vector encoding and Top-K retrieval time on Mac |
 

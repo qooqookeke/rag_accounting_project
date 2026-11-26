@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yeta-RAG 챗봇 위젯 임베드 데모</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; background: #f8fafc; color: #1e293b; }
+    .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+    h1 { font-size: 20px; margin-bottom: 8px; color: #0f172a; }
+    p { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+    .chat-box { height: 260px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; overflow-y: auto; background: #f1f5f9; font-size: 13px; margin-bottom: 12px; }
+    .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 8px; max-width: 80%; }
+    .user-msg { background: #3b82f6; color: white; margin-left: auto; text-align: right; }
+    .ai-msg { background: white; color: #1e293b; border: 1px solid #cbd5e1; }
+    .input-row { display: flex; gap: 8px; }
+    input[type="text"] { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
+    button { padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+    button:hover { background: #1d4ed8; }
+    .source-tag { font-size: 11px; color: #0284c7; margin-top: 4px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🏛️ Yeta-RAG 웹사이트 임베디드 위젯 데모</h1>
+    <p>본 데모는 일반 홈페이지나 블로그에 백엔드 API(<code>/api/v1/chat</code>)를 연결한 실제 동작 예시입니다.</p>
+
+    <div class="chat-box" id="chatBox">
+      <div class="msg ai-msg">안녕하세요! 연말정산 질문을 남겨주시면 법조문 근거와 함께 답변해 드립니다.</div>
+    </div>
+
+    <div class="input-row">
+      <input type="text" id="queryInput" placeholder="예: 월세 세액공제 한도가 얼마야?" onkeypress="if(event.key==='Enter') sendQuery()">
+      <button onclick="sendQuery()">질문</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8000/api/v1/chat";
+
+    async function sendQuery() {
+      const input = document.getElementById("queryInput");
+      const chatBox = document.getElementById("chatBox");
+      const query = input.value.trim();
+      if (!query) return;
+
+      chatBox.innerHTML += `<div class="msg user-msg">${query}</div>`;
+      input.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: query, top_k: 2 })
+        });
+        const data = await res.json();
+        
+        let sourceHtml = "";
+        if (data.sources && data.sources.length > 0) {
+          sourceHtml = `<span class="source-tag">📚 근거: ${data.sources[0].law_ref} (${data.sources[0].title})</span>`;
+        }
+        
+        chatBox.innerHTML += `<div class="msg ai-msg">${data.answer}${sourceHtml}</div>`;
+      } catch (err) {
+        chatBox.innerHTML += `<div class="msg ai-msg" style="color:red;">오류: API 서버(localhost:8000)가 켜져 있는지 확인하세요.</div>`;
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
